@@ -1,20 +1,88 @@
 /* =========================================
    MADRAS DRIVEN — script.js
-   Cinematic Premium Edition
+   CRAZY EDITION 🔥
    ========================================= */
 
-// ---- PAGE LOADER ----
-const loader = document.createElement('div');
-loader.className = 'page-loader';
-loader.innerHTML = `
-  <div class="loader-logo">MADRAS<span>DRIVEN</span></div>
-  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+// ---- SPLIT SCREEN LOADER ----
+const splitLoader = document.createElement('div');
+splitLoader.className = 'split-loader';
+splitLoader.innerHTML = `
+  <div class="split-top"></div>
+  <div class="split-bottom"></div>
+  <div class="split-loader-line"></div>
+  <div class="split-loader-logo">MADRAS<span>DRIVEN</span></div>
 `;
-document.body.prepend(loader);
+document.body.prepend(splitLoader);
+document.body.style.overflow = 'hidden';
 
-window.addEventListener('load', () => {
-  setTimeout(() => loader.classList.add('hide'), 1500);
+// Sequence: line draws → splits open → content revealed
+setTimeout(() => splitLoader.classList.add('open'), 600);
+setTimeout(() => {
+  document.body.style.overflow = '';
+  splitLoader.style.pointerEvents = 'none';
+  setTimeout(() => splitLoader.remove(), 500);
+}, 1800);
+
+// ---- GLITCH LOGO SETUP ----
+const navLogo = document.querySelector('.nav-logo');
+if (navLogo) {
+  navLogo.setAttribute('data-text', navLogo.textContent);
+
+  // Auto-trigger glitch every 5 seconds
+  setInterval(() => {
+    navLogo.classList.add('auto-glitch');
+    setTimeout(() => navLogo.classList.remove('auto-glitch'), 600);
+  }, 5000);
+}
+
+// ---- FIRE / SMOKE CURSOR TRAIL ---- 
+const fireColors = [
+  '#ff2200', '#ff5500', '#ff8800', '#ffaa00',
+  '#ffcc00', '#fff200', '#ff4400', '#e8190a'
+];
+let lastX = 0, lastY = 0;
+let fireFrame = 0;
+
+document.addEventListener('mousemove', (e) => {
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  const speed = Math.sqrt(dx*dx + dy*dy);
+  lastX = e.clientX;
+  lastY = e.clientY;
+
+  // Only spawn particles when moving fast enough
+  if (speed < 2) return;
+
+  // Spawn 2–4 particles per move
+  const count = Math.min(4, Math.floor(speed / 8) + 1);
+  for (let i = 0; i < count; i++) {
+    spawnFireParticle(e.clientX, e.clientY, speed);
+  }
+  fireFrame++;
 });
+
+function spawnFireParticle(x, y, speed) {
+  const p = document.createElement('div');
+  p.className = 'fire-particle';
+
+  const size   = Math.random() * 14 + 6;
+  const color  = fireColors[Math.floor(Math.random() * fireColors.length)];
+  const dur    = Math.random() * 400 + 300;
+  const spread = (Math.random() - 0.5) * 20;
+
+  p.style.cssText = `
+    left: ${x + spread}px;
+    top:  ${y + spread}px;
+    width:  ${size}px;
+    height: ${size}px;
+    background: radial-gradient(circle, ${color} 0%, transparent 70%);
+    animation-duration: ${dur}ms;
+    filter: blur(${Math.random() * 3 + 1}px);
+  `;
+
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), dur);
+}
 
 // ---- CUSTOM CURSOR ----
 const cursor     = document.getElementById('cursor');
@@ -28,8 +96,6 @@ if (cursor && cursorRing) {
     cursor.style.left = mouseX + 'px';
     cursor.style.top  = mouseY + 'px';
   });
-
-  // Smooth ring follow with lerp
   function lerpCursor() {
     ringX += (mouseX - ringX) * 0.1;
     ringY += (mouseY - ringY) * 0.1;
@@ -78,20 +144,13 @@ if (videoToggle && heroVideo) {
   });
 }
 
-// ---- UNIVERSAL SCROLL REVEAL ----
+// ---- SCROLL REVEAL ----
 const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
-document.querySelectorAll(
-  '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger, .reveal-line, .section-label'
-).forEach(el => revealObserver.observe(el));
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .section-label').forEach(el => revealObserver.observe(el));
 
-// Add reveal classes automatically to key elements
 document.querySelectorAll('.event-card').forEach((el, i) => {
   el.classList.add('reveal-scale');
   el.style.transitionDelay = `${i * 0.1}s`;
@@ -117,21 +176,9 @@ document.querySelectorAll('.pillar').forEach((el, i) => {
   el.style.transitionDelay = `${i * 0.1}s`;
   revealObserver.observe(el);
 });
-document.querySelectorAll('.about-left').forEach(el => {
-  el.classList.add('reveal-left');
-  revealObserver.observe(el);
-});
-document.querySelectorAll('.about-right').forEach(el => {
-  el.classList.add('reveal-right');
-  revealObserver.observe(el);
-});
-document.querySelectorAll('.merch-inner').forEach(el => {
-  el.classList.add('reveal');
-  revealObserver.observe(el);
-});
-document.querySelectorAll('section').forEach(el => {
-  revealObserver.observe(el);
-});
+document.querySelector('.about-left')?.classList.add('reveal-left');
+document.querySelector('.about-right')?.classList.add('reveal-right');
+document.querySelectorAll('.about-left, .about-right, .merch-inner').forEach(el => revealObserver.observe(el));
 
 // ---- COUNT-UP NUMBERS ----
 function animateCountUp(el, target, duration = 1800) {
@@ -143,7 +190,6 @@ function animateCountUp(el, target, duration = 1800) {
     else el.textContent = Math.floor(start).toLocaleString();
   }, 16);
 }
-
 let numbersAnimated = false;
 const numbersSection = document.getElementById('numbers');
 if (numbersSection) {
@@ -167,48 +213,30 @@ const lightboxNext  = document.getElementById('lightboxNext');
 let currentIndex    = 0;
 
 function getImages() {
-  return galleryItems
-    .map(item => item.querySelector('img'))
-    .filter(img => img && img.naturalWidth > 0);
+  return galleryItems.map(i => i.querySelector('img')).filter(img => img && img.naturalWidth > 0);
 }
-function openLightbox(index) {
-  const imgs = getImages();
-  if (!imgs.length) return;
-  currentIndex = index;
-  lightboxImg.src = imgs[currentIndex].src;
-  lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden';
+function openLightbox(i) {
+  const imgs = getImages(); if (!imgs.length) return;
+  currentIndex = i; lightboxImg.src = imgs[i].src;
+  lightbox.classList.add('active'); document.body.style.overflow = 'hidden';
 }
-function closeLightbox() {
-  lightbox.classList.remove('active');
-  document.body.style.overflow = '';
-}
-function showPrev() {
-  const imgs = getImages();
-  currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
-  lightboxImg.src = imgs[currentIndex].src;
-}
-function showNext() {
-  const imgs = getImages();
-  currentIndex = (currentIndex + 1) % imgs.length;
-  lightboxImg.src = imgs[currentIndex].src;
-}
+function closeLightbox() { lightbox.classList.remove('active'); document.body.style.overflow = ''; }
+function showPrev() { const imgs = getImages(); currentIndex = (currentIndex - 1 + imgs.length) % imgs.length; lightboxImg.src = imgs[currentIndex].src; }
+function showNext() { const imgs = getImages(); currentIndex = (currentIndex + 1) % imgs.length; lightboxImg.src = imgs[currentIndex].src; }
 galleryItems.forEach((item, i) => {
   item.addEventListener('click', () => {
-    const imgs = getImages();
-    const img  = item.querySelector('img');
-    const idx  = imgs.indexOf(img);
+    const imgs = getImages(); const img = item.querySelector('img'); const idx = imgs.indexOf(img);
     if (idx >= 0) openLightbox(idx);
   });
 });
-if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-if (lightboxPrev)  lightboxPrev.addEventListener('click', showPrev);
-if (lightboxNext)  lightboxNext.addEventListener('click', showNext);
-if (lightbox) lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+lightboxClose?.addEventListener('click', closeLightbox);
+lightboxPrev?.addEventListener('click',  showPrev);
+lightboxNext?.addEventListener('click',  showNext);
+lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 document.addEventListener('keydown', (e) => {
   if (!lightbox?.classList.contains('active')) return;
-  if (e.key === 'Escape')     closeLightbox();
-  if (e.key === 'ArrowLeft')  showPrev();
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') showPrev();
   if (e.key === 'ArrowRight') showNext();
 });
 
@@ -216,52 +244,4 @@ document.addEventListener('keydown', (e) => {
 function subscribeNewsletter() {
   const input = document.getElementById('emailInput');
   const msg   = document.getElementById('newsletterMsg');
-  const email = input.value.trim();
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    msg.textContent = '⚠ Please enter a valid email address.';
-    msg.style.color = '#ff5500'; return;
-  }
-  msg.textContent = "✔ You're in! Welcome to the Madras Driven family.";
-  msg.style.color = '#e8190a';
-  input.value = '';
-  setTimeout(() => { msg.textContent = 'No spam. Just car culture. Unsubscribe anytime.'; msg.style.color = ''; }, 4000);
-}
-document.getElementById('emailInput')?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') subscribeNewsletter();
-});
-
-// ---- ACTIVE NAV HIGHLIGHT ----
-const allSections = document.querySelectorAll('section[id]');
-const allNavLinks = document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  allSections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
-  allNavLinks.forEach(a => { a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--white)' : ''; });
-}, { passive: true });
-
-// ---- CINEMATIC HERO PARALLAX ----
-const heroGrid    = document.querySelector('.hero-grid');
-const heroContent = document.querySelector('.hero-content');
-const heroVid     = document.querySelector('.hero-video-wrap');
-
-window.addEventListener('scroll', () => {
-  const y = window.scrollY;
-  if (y < window.innerHeight) {
-    if (heroGrid)    heroGrid.style.transform    = `translateY(${y * 0.2}px)`;
-    if (heroVid)     heroVid.style.transform     = `translateY(${y * 0.15}px)`;
-    if (heroContent) heroContent.style.transform = `translateY(${y * 0.08}px)`;
-  }
-}, { passive: true });
-
-// ---- MAGNETIC BUTTON EFFECT ----
-document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
-  btn.addEventListener('mousemove', (e) => {
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width  / 2;
-    const y = e.clientY - rect.top  - rect.height / 2;
-    btn.style.transform = `translate(${x * 0.18}px, ${y * 0.18}px)`;
-  });
-  btn.addEventListener('mouseleave', () => {
-    btn.style.transform = '';
-  });
-});
+  const email = input.value
