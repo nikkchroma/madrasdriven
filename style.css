@@ -521,3 +521,146 @@ footer { background: var(--deep); border-top: 1px solid var(--border); padding: 
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
   .gallery-item.tall { grid-row: span 1; }
 }
+
+/* =============================================
+   CINEMATIC ANIMATIONS & PREMIUM TRANSITIONS
+   ============================================= */
+
+/* Page loader */
+.page-loader {
+  position: fixed; inset: 0; z-index: 99999;
+  background: var(--black);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.page-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem; letter-spacing: 0.2em; color: var(--white);
+  animation: loaderPulse 1.2s ease-in-out infinite;
+}
+.loader-logo span { color: var(--red); }
+.loader-bar-wrap {
+  width: 200px; height: 1px; background: var(--border);
+  position: relative; overflow: hidden;
+}
+.loader-bar {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: var(--red);
+  animation: loaderFill 1.4s ease forwards;
+}
+@keyframes loaderPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes loaderFill  { from { width: 0; } to { width: 100%; } }
+
+/* Cinematic line reveals */
+.reveal-line {
+  overflow: hidden; display: block;
+}
+.reveal-line-inner {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-line.visible .reveal-line-inner { transform: translateY(0); }
+
+/* Premium section reveals */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Staggered children */
+.reveal-stagger > * {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.05s; }
+.reveal-stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.15s; }
+.reveal-stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.25s; }
+.reveal-stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
+
+/* Horizontal slide in */
+.reveal-left  { opacity: 0; transform: translateX(-50px); transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1), transform 0.85s cubic-bezier(0.16,1,0.3,1); }
+.reveal-right { opacity: 0; transform: translateX(50px);  transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1), transform 0.85s cubic-bezier(0.16,1,0.3,1); }
+.reveal-left.visible, .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* Scale reveal for cards */
+.reveal-scale {
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+              transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* Magnetic button effect */
+.btn-primary, .btn-ghost, .nav-cta, .btn-ticket {
+  transition: background 0.25s, transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s;
+}
+.btn-primary:hover  { box-shadow: 0 8px 32px rgba(232,25,10,0.35); }
+.nav-cta:hover      { box-shadow: 0 8px 32px rgba(232,25,10,0.35); }
+
+/* Smooth image zoom on event cards */
+.event-card-img img {
+  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), filter 0.4s ease !important;
+}
+.event-card:hover .event-card-img img {
+  transform: scale(1.08) !important;
+}
+
+/* Red line sweep on section labels */
+.section-label {
+  position: relative; overflow: hidden;
+}
+.section-label::after {
+  content: '';
+  position: absolute; bottom: -2px; left: 0;
+  width: 0; height: 1px; background: var(--red);
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+}
+.section-label.visible::after { width: 60px; }
+
+/* Glowing red border on hover for cards */
+.event-card, .exp-item, .community-card {
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.4s,
+              box-shadow 0.5s !important;
+}
+.event-card:hover    { box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,25,10,0.2) !important; }
+.exp-item:hover      { box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,25,10,0.15) !important; }
+.community-card:hover{ box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,25,10,0.15) !important; }
+
+/* Smooth ticker pause on hover */
+.ticker:hover .ticker-track { animation-play-state: paused; }
+
+/* Numbers count section — premium fade */
+#numbers .number-val {
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+#numbers:hover .number-val { transform: scale(1.04); }
+
+/* Cinematic hero text shadow */
+.hero-h1 {
+  text-shadow: 0 4px 40px rgba(0,0,0,0.6);
+}
+
+/* Smooth nav link underline */
+.nav-links a::after {
+  transition: width 0.35s cubic-bezier(0.16,1,0.3,1) !important;
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+/* Smooth page scroll */
+html { scroll-behavior: smooth; }
+
+/* Selection color */
+::selection { background: var(--red); color: var(--white); }
